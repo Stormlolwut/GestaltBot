@@ -29,8 +29,9 @@ namespace GestaltBot.Modules {
             manager.CreateCommands("", cmd => {
 
                 cmd.CreateCommand("meme")
+                .Alias("m")
                 .Description("Let the bot do all the hard work for finding dank meme's")
-                .MinPermissions((int)DiscordAccesLevel.User)
+                .MinPermissions((int)DiscordAccesLevel.MemePeasant)
                 .Parameter("text", ParameterType.Unparsed)
                 .Do(async (e) => {
 
@@ -42,12 +43,35 @@ namespace GestaltBot.Modules {
                     int ramdomMemeIndex = random.Next(urls.Count - 1);
                     string randomMeme = urls[ramdomMemeIndex];
 
-                    await e.Channel.SendMessage(e.User.Mention + " here is your fresh meme :tired_face: " + ":sweat_drops: " + " (" + text.ToUpper() + ") ");
+                    await e.Channel.SendMessage(e.User.Mention + " | Here is your fresh meme :tired_face: " + ":sweat_drops: " + " (" + text.ToUpper() + ") ");
                     await e.Channel.SendMessage(randomMeme);
                 });
 
+                cmd.CreateCommand("prune")
+                .Alias("p")
+                .Description("Let's you mass remove messages on a channel")
+                .MinPermissions((int)DiscordAccesLevel.MemeKnight)
+                .Parameter("number", ParameterType.Unparsed)
+                .Do(async (e) => {
 
+                    string number = e.Args[0];
+                    int convertednum = Int32.Parse(number);
+
+                    if (convertednum > 100) {
+
+                        await e.Channel.SendMessage(e.User.Mention + " | I can only remove 100 messages at a time. :no_entry: ");
+                        convertednum = 100;
+
+                    }
+
+                    Message[] messagestodelete = await e.Channel.DownloadMessages(convertednum);
+                    Console.WriteLine(messagestodelete.Length);
+                    await e.Channel.SendMessage(e.User.Mention + " | I removed " + messagestodelete.Length + " messages for you :white_check_mark: ");
+                    await e.Channel.DeleteMessages(messagestodelete);
+
+                });
             });
+
         }
 
         private string GetHtmlLink(string topic) {

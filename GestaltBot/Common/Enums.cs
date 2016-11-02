@@ -8,10 +8,10 @@ namespace GestaltBot.Enums {
     
     public enum DiscordAccesLevel {
         Blocked,
-        User,
-        ChannelAdmin,
-        ServerAdmin,
-        ServerOwner,
+        MemePeasant,
+        MemeKnight,
+        MemeLord,
+        MemeKing,
         BotOwner
     }
 }

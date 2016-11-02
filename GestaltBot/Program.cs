@@ -82,16 +82,16 @@ namespace GestaltBot {
             if (!channel.IsPrivate)                          
             {
                 if (user == channel.Server.Owner)             
-                    return DiscordAccesLevel.ServerOwner;
+                    return DiscordAccesLevel.MemeKing;
 
                 if (user.ServerPermissions.Administrator)      
-                    return DiscordAccesLevel.ServerAdmin;
+                    return DiscordAccesLevel.MemeLord;
 
                 if (user.GetPermissions(channel).ManageChannel) 
-                    return DiscordAccesLevel.ChannelAdmin;
+                    return DiscordAccesLevel.MemeKnight;
             }
 
-            return DiscordAccesLevel.User;
+            return DiscordAccesLevel.MemePeasant;
         }
 
     }
