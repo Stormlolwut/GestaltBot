@@ -1,5 +1,6 @@
-﻿using Discord;
+﻿/*using Discord;
 using Discord.Commands;
+using Discord.Commands.Permissions.Levels;
 using Discord.Modules;
 
 using System;
@@ -81,9 +82,9 @@ namespace GestaltBot {
             var response = (HttpWebResponse)request.GetResponse();
 
             using (Stream dataStream = response.GetResponseStream()) {
-                if(dataStream == null) {
+                if(dataStream == null) 
                     return "";
-                }
+
                 using (var sr = new StreamReader(dataStream)) {
                     data = sr.ReadToEnd();
                 }
@@ -124,10 +125,31 @@ namespace GestaltBot {
                 }
             }
         }
-
         private void Log(object sender, LogMessageEventArgs e) {
             Console.WriteLine(e.Message);
         }
 
     }
+
+}
+
+public class ModeratorModule : IModule {
+
+    private ModuleManager m_manager;
+    private DiscordClient m_client;
+
+    void IModule.Install(ModuleManager manager) {
+
+        m_manager = manager;
+        m_client = manager.Client;
+
+        manager.CreateCommands("", cmd => {
+
+            cmd.CreateCommand("meme")
+            .Description("Let the bot do all the hard work for finding dank meme's");
+
+        });
+
+    }
+
 }
