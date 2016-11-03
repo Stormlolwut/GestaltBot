@@ -6,6 +6,7 @@ using GestaltBot.Enums;
 using GestaltBot.Types;
 
 
+
 using System;
 using System.Security;
 using System.Collections.Generic;
@@ -56,6 +57,7 @@ namespace GestaltBot {
             m_client.Log.Message += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
 
             m_client.AddModule<Modules.UserModule>();
+            m_client.AddModule<Modules.TalkModule>();
 
             m_client.ExecuteAndWait(async () => {
 
