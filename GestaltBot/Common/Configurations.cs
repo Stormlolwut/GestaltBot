@@ -4,15 +4,16 @@ using System.IO;
 namespace GestaltBot.Types {
     public class Configurations {
 
-
+        public bool MentionPrefix { get; set; }
         public char Prefix { get; set; }
         public ulong[] Owners { get; set; }
         public string Token { get; set; }
 
         public Configurations() {
             Prefix = '!';
+            MentionPrefix = false;
             Owners = new ulong[0];
-            Token = "MjQxMTk2MzAxNjc1Mzk3MTIx.Cvk2NA.ra-tWKeGDhCgr9YYX9SnXrMflBM";
+            Token = "";
         }
 
         public void SaveFile(string loc) {

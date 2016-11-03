@@ -28,6 +28,25 @@ namespace GestaltBot.Modules {
 
             manager.CreateCommands("", cmd => {
 
+                cmd.CreateCommand("commands")
+                .Alias("c")
+                .Description("Gives you all the commands")
+                .Do(async (e) => {
+                await e.User.SendMessage(
+                        "**User Commands**" + System.Environment.NewLine +
+                        "```" +
+                        " 1. !commands [Sends you a private message with all the commands]" + System.Environment.NewLine +
+                        " 2. !meme {searchword} [Finds a random image on google for you and posts it in the chat]" + System.Environment.NewLine +
+                        " 3. !talk {what you want to say} [Talk with me about anything] " + System.Environment.NewLine +
+                        "```" +
+                        "**Moderator Commands**" + System.Environment.NewLine +
+                        "```" +
+                        " 1. !prune {*1/100*} [Removes a certain amount of messages]" + System.Environment.NewLine +
+                        " 2. !announce {announcement} [Gives a private message to everyone on the guild]" + System.Environment.NewLine +
+                        "```"
+                        );
+                });
+
                 cmd.CreateCommand("meme")
                 .Alias("m")
                 .Description("Let the bot do all the hard work for finding dank meme's")
@@ -43,33 +62,10 @@ namespace GestaltBot.Modules {
                     int ramdomMemeIndex = random.Next(urls.Count - 1);
                     string randomMeme = urls[ramdomMemeIndex];
 
-                    await e.Channel.SendMessage(e.User.Mention + " | Here is your fresh meme :tired_face: " + ":sweat_drops: " + " (" + text.ToUpper() + ") ");
+                    await e.Channel.SendMessage(e.User.Mention + " | Here is your fresh meme :ok_hand:" + " [**" + text + "**] ");
                     await e.Channel.SendMessage(randomMeme);
                 });
 
-                cmd.CreateCommand("prune")
-                .Alias("p")
-                .Description("Let's you mass remove messages on a channel")
-                .MinPermissions((int)DiscordAccesLevel.MemeKnight)
-                .Parameter("number", ParameterType.Unparsed)
-                .Do(async (e) => {
-
-                    string number = e.Args[0];
-                    int convertednum = Int32.Parse(number);
-
-                    if (convertednum > 100) {
-
-                        await e.Channel.SendMessage(e.User.Mention + " | I can only remove 100 messages at a time. :no_entry: ");
-                        convertednum = 100;
-
-                    }
-
-                    Message[] messagestodelete = await e.Channel.DownloadMessages(convertednum);
-                    Console.WriteLine(messagestodelete.Length);
-                    await e.Channel.SendMessage(e.User.Mention + " | I removed " + messagestodelete.Length + " messages for you :white_check_mark: ");
-                    await e.Channel.DeleteMessages(messagestodelete);
-
-                });
             });
 
         }

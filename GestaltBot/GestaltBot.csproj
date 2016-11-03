@@ -82,17 +82,18 @@
     <Compile Include="Common\Enums.cs" />
     <Compile Include="Common\Configurations.cs" />
     <Compile Include="MainBot.cs" />
+    <Compile Include="ModeratorModule.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Modules\UserModule.cs" />
-    <Compile Include="TalkModule.cs" />
+    <Compile Include="Modules\TalkModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Desktop\dotnet\ChatterBotAPI\ChatterBotAPI.csproj">
+    <ProjectReference Include="..\ChatterBotAPI\ChatterBotAPI.csproj">
       <Project>{2e624962-f155-432c-a90a-e1ce75dee9ea}</Project>
       <Name>ChatterBotAPI</Name>
     </ProjectReference>

@@ -48,6 +48,8 @@ namespace GestaltBot {
 
             })
             .UsingCommands(x => {
+              
+                x.AllowMentionPrefix = m_config.MentionPrefix;
                 x.PrefixChar = m_config.Prefix;
                 x.HelpMode = HelpMode.Public;
             })
@@ -58,6 +60,7 @@ namespace GestaltBot {
 
             m_client.AddModule<Modules.UserModule>();
             m_client.AddModule<Modules.TalkModule>();
+            m_client.AddModule<Modules.ModeratorModule>();
 
             m_client.ExecuteAndWait(async () => {
 
@@ -72,6 +75,10 @@ namespace GestaltBot {
                     }
                 }
             });
+        }
+
+        private void M_client_UserJoined(object sender, UserEventArgs e) {
+            throw new NotImplementedException();
         }
 
         private DiscordAccesLevel GetPermissions(User user, Channel channel) {
