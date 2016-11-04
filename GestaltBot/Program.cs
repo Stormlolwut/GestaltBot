@@ -93,10 +93,10 @@ namespace GestaltBot {
                 if (user == channel.Server.Owner)             
                     return DiscordAccesLevel.MemeKing;
 
-                if (user.ServerPermissions.Administrator)      
+                if (user.ServerPermissions.ManageServer)      
                     return DiscordAccesLevel.MemeLord;
 
-                if (user.GetPermissions(channel).ManageChannel) 
+                if (user.ServerPermissions.MuteMembers) 
                     return DiscordAccesLevel.MemeKnight;
             }
 

@@ -15,6 +15,8 @@ namespace GestaltBot.Modules {
 
         private ModuleManager m_manager;
         private DiscordClient m_client;
+        public static bool m_filterOn;
+
 
         void IModule.Install(ModuleManager manager) {
 
@@ -59,14 +61,28 @@ namespace GestaltBot.Modules {
                     string text = e.Args[0];
                     string announcer = e.User.Mention;
 
-                    for (int i = 0; i <  e.Server.UserCount; i++) {
+                    for (int i = 0; i < e.Server.UserCount; i++) {
                         markedforannounce = e.Server.Users.ToList<User>();
                     }
 
                     for (int i = 0; i < markedforannounce.Count; i++) {
                         await markedforannounce[i].SendMessage(":satellite: Good day, " + markedforannounce[i].Mention + " this is a announcement from: " + announcer + ": **[" + text + "]** ");
                     }
-                   
+
+                });
+
+
+
+                cmd.CreateCommand("allowNSFW")
+                .Alias("allow")
+                .Description("Allows/Disallows nsfw content in the chat room")
+                .Parameter("bool", ParameterType.Unparsed)
+                .MinPermissions((int)DiscordAccesLevel.MemeKnight)
+                .Do(async (e) => {
+
+                    bool boolconvert = Convert.ToBoolean(e.Args[0]);
+                    m_filterOn = boolconvert;
+                    await e.Channel.SendMessage("NSFW filter set to: " + boolconvert);
                 });
             });
         }
