@@ -22,7 +22,6 @@ namespace GestaltBot.Modules {
         void IModule.Install(ModuleManager manager) {
 
             Random random = new Random();
-
             m_manager = manager;
             m_client = manager.Client;
 
@@ -37,7 +36,7 @@ namespace GestaltBot.Modules {
                         "```" +
                         " 1. !commands [Sends you a private message with all the commands]" + System.Environment.NewLine +
                         " 2. !meme {searchword} [Finds a random image on google for you and posts it in the chat]" + System.Environment.NewLine +
-                        " 3. !talk {what you want to say} [Talk with me about anything] " + System.Environment.NewLine +
+                        " 3. !say {what you want to say} [Talk with me about anything] " + System.Environment.NewLine +
                         "```" +
                         "**Moderator Commands**" + System.Environment.NewLine +
                         "```" +
@@ -58,12 +57,20 @@ namespace GestaltBot.Modules {
 
                     string html = GetHtmlLink(text);
                     List<string> urls = ParseUrl(html);
+                    Console.WriteLine(urls.Count);
 
-                    int ramdomMemeIndex = random.Next(urls.Count - 1);
-                    string randomMeme = urls[ramdomMemeIndex];
+                    if(urls.Count> 0) {
 
-                    await e.Channel.SendMessage(e.User.Mention + " | Here is your fresh meme :ok_hand:" + " [**" + text + "**] ");
-                    await e.Channel.SendMessage(randomMeme);
+                        int ramdomMemeIndex = random.Next(urls.Count - 1);
+                        string randomMeme = urls[ramdomMemeIndex];
+
+                        await e.Channel.SendMessage(e.User.Mention + " | Here is your fresh meme :ok_hand:" + " [**" + text + "**] ");
+                        await e.Channel.SendMessage(randomMeme);
+                    }
+                    else {
+                        await e.Channel.SendMessage(e.User.Mention + " | I am sorry i couldnt find anything :no_entry:" + " [**" + text + "**] ");
+                    }
+
                 });
 
             });
@@ -71,8 +78,16 @@ namespace GestaltBot.Modules {
         }
 
         private string GetHtmlLink(string topic) {
+            
+            //Move this to the moderator module within the NSFW filter instead of here!
+            string safesearch ="";
 
-            string url = "https://www.google.com/search?q=" + topic + "&tbm=isch";
+            if (!ModeratorModule.m_filterOn)
+                safesearch = "&safe=off";
+            else
+                safesearch = "&safe=on";
+
+            string url = "https://www.google.com/search?q=" + topic + safesearch + "&tbm=isch";
             string data = "";
 
             var request = (HttpWebRequest)WebRequest.Create(url);
