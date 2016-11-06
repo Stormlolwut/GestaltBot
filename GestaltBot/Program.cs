@@ -61,6 +61,8 @@ namespace GestaltBot {
             m_client.AddModule<Modules.UserModule>();
             m_client.AddModule<Modules.TalkModule>();
             m_client.AddModule<Modules.ModeratorModule>();
+            m_client.AddModule<Modules.MusicModule>();
+            m_client.AddModule<Modules.OverwatchModule>();
 
             m_client.ExecuteAndWait(async () => {
 
