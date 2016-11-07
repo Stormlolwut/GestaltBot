@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord.Commands.Permissions.Levels;
 using Discord.Modules;
 using GestaltBot.Enums;
+using Discord.Net.WebSockets;
 
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace GestaltBot.Modules {
-    class ModeratorModule : IModule {
+    class ModeratorModule : IModule{
 
 
         public static List<Channel> m_allowedNSFW = new List<Channel>();
@@ -41,20 +42,20 @@ namespace GestaltBot.Modules {
 
                     if (convertednum > 100) {
 
-                        await e.Channel.SendMessage(e.User.Mention + " | I can only remove 100 messages at a time. :no_entry: ");
+                        await e.Channel.SendMessage(e.User.Mention + ":no_entry: | I can only remove 100 messages at a time.");
                         convertednum = 100;
 
                     }
 
                     Message[] messagestodelete = await e.Channel.DownloadMessages(convertednum);
                     await e.Channel.DeleteMessages(messagestodelete);
-                    await e.Channel.SendMessage(e.User.Mention + " | I removed " + messagestodelete.Length + " messages for you :white_check_mark: ");
+                    await e.Channel.SendMessage(e.User.Mention + ":white_check_mark: | I removed " + messagestodelete.Length + " messages for you.");
                 });
 
                 cmd.CreateCommand("announce")
                 .Alias("a")
                 .Description("Sends a message to all the people in the discord server")
-                .MinPermissions((int)DiscordAccesLevel.MemeKnight)
+                .MinPermissions((int)DiscordAccesLevel.MemeLord)
                 .Parameter("text", ParameterType.Unparsed)
                 .Do(async (e) => {
 
@@ -62,14 +63,15 @@ namespace GestaltBot.Modules {
                     string text = e.Args[0];
                     string announcer = e.User.Mention;
 
-                    for (int i = 0; i < e.Server.UserCount; i++) {
-                        markedforannounce = e.Server.Users.ToList<User>();
-                    }
-
+                    markedforannounce = (e.Server.Users.ToList<User>());
+                    Console.WriteLine(markedforannounce.Count);
                     for (int i = 0; i < markedforannounce.Count; i++) {
-                        await markedforannounce[i].SendMessage(":satellite: Good day, " + markedforannounce[i].Mention + " this is a announcement from: " + announcer + ": **[" + text + "]** ");
+                        try {
+                            await markedforannounce[i].SendMessage(":satellite: | Good day, " + markedforannounce[i].Mention + " this is a announcement from: " + announcer + ": **[" + text + "]** ");
+                        }
+                        catch {}
                     }
-
+                    await e.Channel.SendMessage(":alarm_clock: | Announcement complete :)");
                 });
 
                 cmd.CreateCommand("nsfwfilter")
@@ -83,11 +85,11 @@ namespace GestaltBot.Modules {
 
                     if (boolconvert) {
                         RemoveServerToNSFW(e);
-                        await e.Channel.SendMessage("NSFW is now disallowed in this channel");
+                        await e.Channel.SendMessage(":underage:  | NSFW is now disallowed in this channel");
                     }
                     else {
                         AddServerToNSFW(e);
-                        await e.Channel.SendMessage("NSFW is now allowed in this channel :smirk: ");
+                        await e.Channel.SendMessage(":spy: | NSFW is now allowed in this channel");
                     }
                 });
             });

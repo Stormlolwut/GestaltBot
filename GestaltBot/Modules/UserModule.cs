@@ -34,17 +34,30 @@ namespace GestaltBot.Modules {
                 await e.User.SendMessage(
                         "**User Commands** \n" +
                         "```" +
-                        " 1. !commands [Sends you a private message with all the commands] \n" +
-                        " 2. !meme {searchword} [Finds a random image on google for you and posts it in the chat] \n" + 
-                        " 3. !say {what you want to say} [Talk with me about anything] \n" + 
+                        " 1. !commands [Sends you a private message with all the commands]\n" +
+                        " 2. !meme {searchword} [Finds a random image on google for you and posts it in the chat]\n" +
+                        " 3. !say {what you want to say} [Talk with me about anything]\n" +
+                        " 4. !play [Play like one amazing song once]" +
+                        " 5. !stop [Disconnects from the server and gives out a free error]\n" +
+                        " 6. !overwatch {yourbatletag#1234} [See your stats on overwatch]\n" + 
                         "```" +
-                        "**Moderator Commands** \n" + 
+                        "\n" +
+                        "**Meme Knight** \n" +
                         "```" +
-                        " 1. !prune {*1/100*} [Removes a certain amount of messages] \n" +
+                        " 1. !prune {*1/100*} [Removes a certain amount of messages]\n" +
+                        "```" +
+                        "\n" +
+                        "**Meme Lord**\n" +
+                        "```" +
                         " 2. !announce {announcement} [Gives a private message to everyone on the guild] \n" +
+                        "```" +
+                        "\n" +
+                        "**Meme King**\n" +
+                        "```" +
                         " 3. !nsfwfilter {false/true} [Sets the nsfw filter for !meme on and or off]" +
                         "```"
                         );
+                    await e.Channel.SendMessage(":eye_in_speech_bubble: | Commands send to you in private.");
                 });
 
                 cmd.CreateCommand("meme")
@@ -64,22 +77,18 @@ namespace GestaltBot.Modules {
                     }
 
                     string html = GetHtmlLink(text, filter);
-
                     List<string> urls = ParseUrl(html);
-                    Console.WriteLine(urls.Count);
 
                     if(urls.Count> 0) {
-
-
 
                         int ramdomMemeIndex = random.Next(urls.Count - 1);
                         string randomMeme = urls[ramdomMemeIndex];
 
-                        await e.Channel.SendMessage(e.User.Mention + " | Here is your fresh meme :ok_hand:" + " [**" + text + "**] ");
+                        await e.Channel.SendMessage(e.User.Mention + ":ok_hand: | Here is your fresh meme." + " [**" + text + "**] ");
                         await e.Channel.SendMessage(randomMeme);
                     }
                     else {
-                        await e.Channel.SendMessage(e.User.Mention + " | I am sorry i couldnt find anything :no_entry:" + " [**" + text + "**] ");
+                        await e.Channel.SendMessage(e.User.Mention + ":no_entry: | I am sorry i couldnt find anything" + " [**" + text + "**] ");
                     }
 
                 });
@@ -103,12 +112,13 @@ namespace GestaltBot.Modules {
 
             var response = (HttpWebResponse)request.GetResponse();
 
-            using (Stream dataStream = response.GetResponseStream()) {
-                if (dataStream == null)
+            using (Stream datastream = response.GetResponseStream()) {
+                if (datastream == null)
                     return "";
 
-                using (var sr = new StreamReader(dataStream)) {
+                using (var sr = new StreamReader(datastream)) {
                     data = sr.ReadToEnd();
+                    //Console.WriteLine(data);
                 }
             }
             return data;
@@ -116,6 +126,7 @@ namespace GestaltBot.Modules {
         private List<string> ParseUrl(string html) {
 
             var urls = new List<string>();
+            Console.WriteLine(urls.Count);
 
             int ndx = html.IndexOf("\"ou\"", StringComparison.Ordinal);
 

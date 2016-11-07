@@ -71,13 +71,13 @@ namespace GestaltBot.Modules {
         }
         public void SendAudio(string filepath, IAudioClient voiceclient) {
 
-            var channelCount = m_client.GetService<AudioService>().Config.Channels;
-            var OutFormat = new WaveFormat(48000, 16, channelCount);
+            int channelcount = m_client.GetService<AudioService>().Config.Channels;
+            WaveFormat outformat = new WaveFormat(48000, 16, channelcount);
             
             using (var MP3reader = new Mp3FileReader(filepath))
-            using (var resampler = new MediaFoundationResampler(MP3reader, OutFormat)) {
+            using (var resampler = new MediaFoundationResampler(MP3reader, outformat)) {
                 resampler.ResamplerQuality = 60; // Set the quality of the resampler to 60, the highest quality
-                int blockSize = OutFormat.AverageBytesPerSecond / 50; // Establish the size of our AudioBuffer
+                int blockSize = outformat.AverageBytesPerSecond / 50; // Establish the size of our AudioBuffer
                 byte[] buffer = new byte[blockSize];
                 int byteCount;
 

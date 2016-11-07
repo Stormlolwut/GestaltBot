@@ -31,6 +31,7 @@ namespace GestaltBot.Modules {
                     string battletag = input.Replace('#', '-');
 
                     try {
+                        await e.Channel.SendMessage(e.User.Mention + " | Here are your stats.");
                         await e.Channel.SendMessage("http://masteroverwatch.com/profile/pc/eu/" + battletag);
                     }
                     catch (Exception ex) {
