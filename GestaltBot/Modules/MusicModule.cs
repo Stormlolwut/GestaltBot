@@ -9,6 +9,13 @@ using NAudio;
 using NAudio.Wave;
 using NAudio.CoreAudioApi;
 
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Services;
+using Google.Apis.Upload;
+using Google.Apis.Util.Store;
+using Google.Apis.YouTube.v3;
+using Google.Apis.YouTube.v3.Data;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,7 +48,7 @@ namespace GestaltBot.Modules {
 
                     string servername = e.Server.Name;
                     string channelname = e.User.VoiceChannel.Name;
-                    Channel voicechannel = m_client.FindServers(servername).FirstOrDefault().FindChannels(channelname).FirstOrDefault();
+                    Discord.Channel voicechannel = m_client.FindServers(servername).FirstOrDefault().FindChannels(channelname).FirstOrDefault();
 
                     try {
 
@@ -49,6 +56,7 @@ namespace GestaltBot.Modules {
                         m_audioClient = await voicservice.Join(voicechannel);
                         await e.Channel.SendMessage("| Good evenin' lads :raised_hand:");
                         string path = "C:/Users/storm/Documents/GitHub/GestaltBot/GestaltBot/Modules/Shia LaBeouf Live - Rob Cantor.mp3";
+                        GetYoutubeLink(e.Args[0]);
                         SendAudio(path, m_audioClient);
                     }
                     catch (Exception ex) {
@@ -63,7 +71,7 @@ namespace GestaltBot.Modules {
 
                     AudioService audioservice = m_client.GetService<AudioService>();
                     //m_audioClient = audioservice.Client;
-                    await audioservice.Leave(e.Server);        
+                    await audioservice.Leave(e.Server);
                     await e.Channel.SendMessage("| Later :raised_hand:");
                 });
             });
@@ -73,16 +81,15 @@ namespace GestaltBot.Modules {
 
             int channelcount = m_client.GetService<AudioService>().Config.Channels;
             WaveFormat outformat = new WaveFormat(48000, 16, channelcount);
-            
+
             using (var MP3reader = new Mp3FileReader(filepath))
             using (var resampler = new MediaFoundationResampler(MP3reader, outformat)) {
-                resampler.ResamplerQuality = 60; // Set the quality of the resampler to 60, the highest quality
-                int blockSize = outformat.AverageBytesPerSecond / 50; // Establish the size of our AudioBuffer
+                resampler.ResamplerQuality = 60;
+                int blockSize = outformat.AverageBytesPerSecond / 50;
                 byte[] buffer = new byte[blockSize];
                 int byteCount;
 
-                while ((byteCount = resampler.Read(buffer, 0, blockSize)) > 0) // Read audio into our buffer, and keep a loop open while data is present
-                {
+                while ((byteCount = resampler.Read(buffer, 0, blockSize)) > 0) {
                     if (byteCount < blockSize) {
 
                         for (int i = byteCount; i < blockSize; i++)
@@ -91,6 +98,40 @@ namespace GestaltBot.Modules {
                     voiceclient.Send(buffer, 0, blockSize); // Send the buffer to Discord
                 }
             }
+        }
+        public async void GetYoutubeLink(string searchargs) {
+
+            YouTubeService youtubeservice = new YouTubeService(new BaseClientService.Initializer() {
+                ApiKey = "AIzaSyALBS4vGHUM7KZM9J9qPHycecc4I4w0ffY",
+                ApplicationName = GetType().ToString()
+            });
+
+            var searchrequest = youtubeservice.Search.List("snippet");
+            searchrequest.Q = searchargs;
+
+            SearchListResponse searchresponds =  await searchrequest.ExecuteAsync(); 
+
+            List<string> videos = new List<string>();
+            List<string> channels = new List<string>();
+            List<string> playlists = new List<string>();
+
+            foreach(var searchresult in searchresponds.Items) {
+
+                switch (searchresult.Id.Kind) {
+                    case "youtube#video":
+                        videos.Add(string.Format("{0} ({1})", searchresult.Snippet.Title, searchresult.Id.VideoId));
+                        break;
+                    case "youtube#channel":
+                        channels.Add(string.Format("{0} ({1})", searchresult.Snippet.Title, searchresult.Id.ChannelId));
+                        break;
+                    case "youtube#playlist":
+                        playlists.Add(string.Format("{0}({1})", searchresult.Snippet.Title, searchresult.Id.PlaylistId));
+                        break;
+                }
+            }
+            Console.WriteLine(string.Format("Videos:\n{0}\n", string.Join("\n", videos)));
+            Console.WriteLine(string.Format("Channels:\n{0}\n", string.Join("\n", channels)));
+            Console.WriteLine(string.Format("Playlists:\n{0}\n", string.Join("\n", playlists)));
         }
     }
 }
