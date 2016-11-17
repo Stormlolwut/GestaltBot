@@ -9,16 +9,18 @@ using NAudio;
 using NAudio.Wave;
 using NAudio.CoreAudioApi;
 
-using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
-using Google.Apis.Upload;
-using Google.Apis.Util.Store;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 
+using YoutubeExtractor;
+
+
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -55,15 +57,34 @@ namespace GestaltBot.Modules {
 
                     string servername = e.Server.Name;
                     string channelname = e.User.VoiceChannel.Name;
-                    Discord.Channel voicechannel = m_client.FindServers(servername).FirstOrDefault().FindChannels(channelname).FirstOrDefault();
-                    GetYoutubeLink(e.Args[0]);
-
 
                     try {
 
+                        Discord.Channel voicechannel = m_client.FindServers(servername).FirstOrDefault().FindChannels(channelname).FirstOrDefault();
+
+                        await GetYoutubeLink(e.Args[0]);
                         videos = m_linkInfo.videos;
-                         
-                        if(videos != null && videos.Count != 0) {
+                        Console.WriteLine(videos[0].ToString());
+
+
+                        bool reading = false;
+                        string url = "";
+                        foreach(char readchar in videos.ToString()) {
+                            if (readchar == '(') {
+                                url = "";
+                                reading = true;
+                            }
+                            if (readchar == ')')
+                                reading = false;
+
+                            if (reading)
+                                url += readchar.ToString();
+                        }
+
+                        VideoInfo video = await DownloadYoutubeLink(url);
+                       
+
+                        if (videos != null && videos.Count != 0) {
                             Console.WriteLine("got it: " + videos.Count);
                         }
                         else {
@@ -71,10 +92,8 @@ namespace GestaltBot.Modules {
                             return;
                         }
 
-
-
                         m_audioClient = await voiceservice.Join(voicechannel);
-                        string path = "C:/Users/storm/Documents/GitHub/GestaltBot/GestaltBot/Modules/Shia LaBeouf Live - Rob Cantor.mp3";
+                        string path = Path.Combine("D:/downloads/", video.Title + video.AudioExtension);
                         SendAudio(path, m_audioClient);
 
                         await e.Channel.SendMessage("| Good evenin' lads :raised_hand:");
@@ -99,7 +118,7 @@ namespace GestaltBot.Modules {
                         await voiceservice.Leave(voicechannel);
                         await e.Channel.SendMessage("| Later :raised_hand:");
                     }
-                    catch(Exception ex) {
+                    catch (Exception ex) {
 
                         Console.WriteLine(ex);
                         await e.Channel.SendMessage("| Uh oh something went wrong!");
@@ -137,7 +156,7 @@ namespace GestaltBot.Modules {
             voiceclient.Disconnect();
         }
 
-        public async void GetYoutubeLink(string searchargs) {
+        public async Task<bool> GetYoutubeLink(string searchargs) {
 
             YouTubeService youtubeservice = new YouTubeService(new BaseClientService.Initializer() {
                 ApiKey = "AIzaSyALBS4vGHUM7KZM9J9qPHycecc4I4w0ffY",
@@ -147,13 +166,13 @@ namespace GestaltBot.Modules {
             var searchrequest = youtubeservice.Search.List("snippet");
             searchrequest.Q = searchargs;
 
-            SearchListResponse searchresponds =  await searchrequest.ExecuteAsync(); 
+            SearchListResponse searchresponds = await searchrequest.ExecuteAsync();
 
             List<string> videos = new List<string>();
             List<string> channels = new List<string>();
             List<string> playlists = new List<string>();
 
-            foreach(var searchresult in searchresponds.Items) {
+            foreach (var searchresult in searchresponds.Items) {
 
                 switch (searchresult.Id.Kind) {
                     case "youtube#video":
@@ -168,8 +187,35 @@ namespace GestaltBot.Modules {
                 }
             }
             m_linkInfo = new ReturnYoutubeInfo(videos, channels, playlists);
+            return true;
+        }
+
+        public async Task<VideoInfo> DownloadYoutubeLink(string url) {
+
+            string fullurl = Path.Combine("www.youtube.com/" + url);
+
+            Console.WriteLine(fullurl);
+
+            IEnumerable<VideoInfo> videoinfos = DownloadUrlResolver.GetDownloadUrls(fullurl);
+
+            VideoInfo video = videoinfos
+                .Where(info => info.CanExtractAudio)
+                .OrderBy(info => info.AudioBitrate)
+                .First();
+
+            if (video.RequiresDecryption) { DownloadUrlResolver.DecryptDownloadUrl(video); }
+
+            AudioDownloader audiodownloader = new AudioDownloader(video, Path.Combine("D:/downloads/", video.Title + video.AudioExtension));
+
+            audiodownloader.DownloadProgressChanged += (sender, args) => Console.WriteLine(args.ProgressPercentage * 0.85);
+            audiodownloader.AudioExtractionProgressChanged += (sender, args) => Console.WriteLine(85 + args.ProgressPercentage * 0.15);
+
+            return video;
         }
     }
+
+
+
 
     public struct ReturnYoutubeInfo {
 
