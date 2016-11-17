@@ -27,37 +27,57 @@ namespace GestaltBot.Modules {
 
         private ModuleManager m_manager;
         private DiscordClient m_client;
-
+        private IAudioClient m_audioClient;
+        private ReturnYoutubeInfo m_linkInfo;
 
         void IModule.Install(ModuleManager manager) {
 
             m_manager = manager;
             m_client = manager.Client;
-            IAudioClient m_audioClient;
+
+            m_client.UsingAudio(x => {
+                x.Mode = AudioMode.Outgoing;
+            });
+
+            AudioService voiceservice = m_client.GetService<AudioService>();
 
             manager.CreateCommands("", cmd => {
 
                 cmd.CreateCommand("play")
                 .Alias("p")
                 .Description("Play the music or sounds")
+                .Parameter("text", ParameterType.Unparsed)
                 .Do(async (e) => {
 
-                    m_client.UsingAudio(x => {
-                        x.Mode = AudioMode.Outgoing;
-                    });
+                    List<string> videos = new List<string>();
+                    List<string> channels = new List<string>();
+                    List<string> playlists = new List<string>();
 
                     string servername = e.Server.Name;
                     string channelname = e.User.VoiceChannel.Name;
                     Discord.Channel voicechannel = m_client.FindServers(servername).FirstOrDefault().FindChannels(channelname).FirstOrDefault();
+                    GetYoutubeLink(e.Args[0]);
+
 
                     try {
 
-                        AudioService voicservice = m_client.GetService<AudioService>();
-                        m_audioClient = await voicservice.Join(voicechannel);
-                        await e.Channel.SendMessage("| Good evenin' lads :raised_hand:");
+                        videos = m_linkInfo.videos;
+                         
+                        if(videos != null && videos.Count != 0) {
+                            Console.WriteLine("got it: " + videos.Count);
+                        }
+                        else {
+                            await e.Channel.SendMessage(" | Sorry i couldn't find anything!");
+                            return;
+                        }
+
+
+
+                        m_audioClient = await voiceservice.Join(voicechannel);
                         string path = "C:/Users/storm/Documents/GitHub/GestaltBot/GestaltBot/Modules/Shia LaBeouf Live - Rob Cantor.mp3";
-                        GetYoutubeLink(e.Args[0]);
                         SendAudio(path, m_audioClient);
+
+                        await e.Channel.SendMessage("| Good evenin' lads :raised_hand:");
                     }
                     catch (Exception ex) {
                         Console.WriteLine(ex.ToString());
@@ -69,10 +89,22 @@ namespace GestaltBot.Modules {
                 .Description("Stops the music bot or sound")
                 .Do(async (e) => {
 
-                    AudioService audioservice = m_client.GetService<AudioService>();
-                    //m_audioClient = audioservice.Client;
-                    await audioservice.Leave(e.Server);
-                    await e.Channel.SendMessage("| Later :raised_hand:");
+                    try {
+
+                        string servername = e.Server.Name;
+                        string channelname = e.User.VoiceChannel.Name;
+                        Discord.Channel voicechannel = m_client.FindServers(servername).FirstOrDefault().FindChannels(channelname).FirstOrDefault();
+
+                        StopAudio(m_audioClient);
+                        await voiceservice.Leave(voicechannel);
+                        await e.Channel.SendMessage("| Later :raised_hand:");
+                    }
+                    catch(Exception ex) {
+
+                        Console.WriteLine(ex);
+                        await e.Channel.SendMessage("| Uh oh something went wrong!");
+                    }
+
                 });
             });
 
@@ -99,6 +131,12 @@ namespace GestaltBot.Modules {
                 }
             }
         }
+
+        public void StopAudio(IAudioClient voiceclient) {
+            voiceclient.Clear();
+            voiceclient.Disconnect();
+        }
+
         public async void GetYoutubeLink(string searchargs) {
 
             YouTubeService youtubeservice = new YouTubeService(new BaseClientService.Initializer() {
@@ -129,10 +167,21 @@ namespace GestaltBot.Modules {
                         break;
                 }
             }
-            Console.WriteLine(string.Format("Videos:\n{0}\n", string.Join("\n", videos)));
-            Console.WriteLine(string.Format("Channels:\n{0}\n", string.Join("\n", channels)));
-            Console.WriteLine(string.Format("Playlists:\n{0}\n", string.Join("\n", playlists)));
+            m_linkInfo = new ReturnYoutubeInfo(videos, channels, playlists);
         }
     }
-}
 
+    public struct ReturnYoutubeInfo {
+
+        public List<string> videos;
+        public List<string> channels;
+        public List<string> playlists;
+
+        public ReturnYoutubeInfo(List<string> videos, List<string> channels, List<string> playlists) {
+            this.videos = videos;
+            this.channels = channels;
+            this.playlists = playlists;
+        }
+    }
+
+}

@@ -3,29 +3,33 @@ using Discord.Commands;
 using Discord.Commands.Permissions.Levels;
 using Discord.Modules;
 using GestaltBot.Enums;
-using Discord.Net.WebSockets;
+using GestaltBot.Types;
+using Newtonsoft.Json;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace GestaltBot.Modules {
     class ModeratorModule : IModule{
 
-
         public static List<Channel> m_allowedNSFW = new List<Channel>();
 
         private ModuleManager m_manager;
         private DiscordClient m_client;
-
+        private Configurations m_config;
+        const string accesconfig = "configurations.json";
 
         void IModule.Install(ModuleManager manager) {
+
             Random random = new Random();
 
             m_manager = manager;
             m_client = manager.Client;
+     
 
             //Lets you talkt to the bot without the command talk
             manager.CreateCommands("", cmd => {
@@ -100,15 +104,15 @@ namespace GestaltBot.Modules {
 
             Channel channel = e.Channel;
             for (int i = 0; i < m_allowedNSFW.Count; i++) {
-                if(m_allowedNSFW[i] == channel) {
+                if (m_allowedNSFW[i] == channel) {
                     m_isChannelIn = true;
                 }
             }
 
             if (!m_isChannelIn) {
+                m_allowedNSFW.Add(channel);
                 Console.WriteLine(channel);
                 Console.WriteLine(m_allowedNSFW.Count);
-                m_allowedNSFW.Add(channel);
             }
             m_isChannelIn = false;
         }

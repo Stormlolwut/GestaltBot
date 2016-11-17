@@ -1,5 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Discord;
+using Newtonsoft.Json;
 using System.IO;
+using System.Collections.Generic;
 
 namespace GestaltBot.Types {
     public class Configurations {
@@ -8,12 +10,14 @@ namespace GestaltBot.Types {
         public char Prefix { get; set; }
         public ulong[] Owners { get; set; }
         public string Token { get; set; }
+        public List<Channel> NsfwChannels { get; set; }
 
         public Configurations() {
             Prefix = '!';
             MentionPrefix = false;
             Owners = new ulong[0];
             Token = "";
+            NsfwChannels = new List<Channel>();
         }
 
         public void SaveFile(string loc) {
