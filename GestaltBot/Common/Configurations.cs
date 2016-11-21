@@ -3,8 +3,10 @@ using Newtonsoft.Json;
 using System.IO;
 using System.Collections.Generic;
 
-namespace GestaltBot.Types {
-    public class Configurations {
+namespace GestaltBot.Types
+{
+    public class Configurations
+    {
 
         public bool MentionPrefix { get; set; }
         public char Prefix { get; set; }
@@ -12,7 +14,8 @@ namespace GestaltBot.Types {
         public string Token { get; set; }
         public List<Channel> NsfwChannels { get; set; }
 
-        public Configurations() {
+        public Configurations()
+        {
             Prefix = '!';
             MentionPrefix = false;
             Owners = new ulong[0];
@@ -20,7 +23,8 @@ namespace GestaltBot.Types {
             NsfwChannels = new List<Channel>();
         }
 
-        public void SaveFile(string loc) {
+        public void SaveFile(string loc)
+        {
 
             string json = JsonConvert.SerializeObject(this, Formatting.Indented);
 
@@ -30,7 +34,8 @@ namespace GestaltBot.Types {
             File.WriteAllText(loc, json);
 
         }
-        public static Configurations LoadFile(string loc) {
+        public static Configurations LoadFile(string loc)
+        {
 
             string json = File.ReadAllText(loc);
             return JsonConvert.DeserializeObject<Configurations>(json);

@@ -13,50 +13,56 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GestaltBot.Modules {
-    public class UserModule : IModule {
+namespace GestaltBot.Modules
+{
+    public class UserModule : IModule
+    {
 
         private ModuleManager m_manager;
         private DiscordClient m_client;
 
-        void IModule.Install(ModuleManager manager) {
+        void IModule.Install(ModuleManager manager)
+        {
 
             Random random = new Random();
             m_manager = manager;
             m_client = manager.Client;
 
-            manager.CreateCommands("", cmd => {
+            manager.CreateCommands("", cmd =>
+            {
 
                 cmd.CreateCommand("commands")
                 .Alias("c")
                 .Description("Gives you all the commands")
-                .Do(async (e) => {
-                await e.User.SendMessage(
-                        "**User Commands** \n" +
-                        "```" +
-                        " 1. !commands [Sends you a private message with all the commands]\n" +
-                        " 2. !meme {searchword} [Finds a random image on google for you and posts it in the chat]\n" +
-                        " 3. !say {what you want to say} [Talk with me about anything]\n" +
-                        " 4. !play [Play like one amazing song once]" +
-                        " 5. !stop [Disconnects from the server and gives out a free error]\n" +
-                        " 6. !overwatch {yourbatletag#1234} [See your stats on overwatch]\n" + 
-                        "```" +
-                        "\n" +
-                        "**Meme Knight** \n" +
-                        "```" +
-                        " 1. !prune {*1/100*} [Removes a certain amount of messages]\n" +
-                        "```" +
-                        "\n" +
-                        "**Meme Lord**\n" +
-                        "```" +
-                        " 2. !announce {announcement} [Gives a private message to everyone on the guild] \n" +
-                        "```" +
-                        "\n" +
-                        "**Meme King**\n" +
-                        "```" +
-                        " 3. !nsfwfilter {false/true} [Sets the nsfw filter for !meme on and or off]" +
-                        "```"
-                        );
+                .Do(async (e) =>
+                {
+                    await e.User.SendMessage(
+                            "**User Commands** \n" +
+                            "```" +
+                            " 1. !commands [Sends you a private message with all the commands]\n" +
+                            " 2. !meme {searchword} [Finds a random image on google for you and posts it in the chat]\n" +
+                            " 3. !say {what you want to say} [Talk with me about anything]\n" +
+                            " 4. !play {url/keywords}[Play something from youtube]" +
+                            " 5. !stop [Stops the bot from playing and disconnects]\n" +
+                            " 6. !skip [Skips to the next song in the Queue else if there arn't any songs left is disconnects]\n" +
+                            " 7. !overwatch {yourbatletag#1234} [See your stats on overwatch]\n" +
+                            "```" +
+                            "\n" +
+                            "**Meme Knight** \n" +
+                            "```" +
+                            " 1. !prune {*1/100*} [Removes a certain amount of messages]\n" +
+                            "```" +
+                            "\n" +
+                            "**Meme Lord**\n" +
+                            "```" +
+                            " 2. !announce {announcement} [Gives a private message to everyone on the guild] \n" +
+                            "```" +
+                            "\n" +
+                            "**Meme King**\n" +
+                            "```" +
+                            " 3. !nsfwfilter {false/true} [Sets the nsfw filter for !meme on and or off]" +
+                            "```"
+                            );
                     await e.Channel.SendMessage(":eye_in_speech_bubble: | Commands send to you in private.");
                 });
 
@@ -65,13 +71,16 @@ namespace GestaltBot.Modules {
                 .Description("Let the bot do all the hard work for finding dank meme's")
                 .MinPermissions((int)DiscordAccesLevel.MemePeasant)
                 .Parameter("text", ParameterType.Unparsed)
-                .Do(async (e) => {
+                .Do(async (e) =>
+                {
                     List<Channel> nsfwlist = ModeratorModule.m_allowedNSFW;
                     string text = e.Args[0];
-                    string filter ="&safe=on";
+                    string filter = "&safe=on";
 
-                    for (int i = 0; i < ModeratorModule.m_allowedNSFW.Count; i++) {
-                        if (e.Channel == nsfwlist[i]) {
+                    for (int i = 0; i < ModeratorModule.m_allowedNSFW.Count; i++)
+                    {
+                        if (e.Channel == nsfwlist[i])
+                        {
                             filter = "&safe=off";
                         }
                     }
@@ -79,15 +88,17 @@ namespace GestaltBot.Modules {
                     string html = GetHtmlLink(text, filter);
                     List<string> urls = ParseUrl(html);
 
-                    if(urls.Count> 0) {
+                    if (urls.Count > 0)
+                    {
 
                         int ramdomMemeIndex = random.Next(urls.Count - 1);
                         string randomMeme = urls[ramdomMemeIndex];
 
-                        await e.Channel.SendMessage(e.User.Mention + ":ok_hand: | Here is your fresh meme." + " [**" + text + "**] ");
+                        await e.Channel.SendTTSMessage(e.User.Mention + ":ok_hand: | Here is your fresh meme." + " [**" + text + "**] ");
                         await e.Channel.SendMessage(randomMeme);
                     }
-                    else {
+                    else
+                    {
                         await e.Channel.SendMessage(e.User.Mention + ":no_entry: | I am sorry i couldnt find anything" + " [**" + text + "**] ");
                     }
 
@@ -97,7 +108,8 @@ namespace GestaltBot.Modules {
 
         }
 
-        private string GetHtmlLink(string topic, string filter) {
+        private string GetHtmlLink(string topic, string filter)
+        {
 
             //Move this to the moderator module within the NSFW filter instead of here!
 
@@ -112,25 +124,29 @@ namespace GestaltBot.Modules {
 
             var response = (HttpWebResponse)request.GetResponse();
 
-            using (Stream datastream = response.GetResponseStream()) {
+            using (Stream datastream = response.GetResponseStream())
+            {
                 if (datastream == null)
                     return "";
 
-                using (var sr = new StreamReader(datastream)) {
+                using (var sr = new StreamReader(datastream))
+                {
                     data = sr.ReadToEnd();
                     //Console.WriteLine(data);
                 }
             }
             return data;
         }
-        private List<string> ParseUrl(string html) {
+        private List<string> ParseUrl(string html)
+        {
 
             var urls = new List<string>();
             Console.WriteLine(urls.Count);
 
             int ndx = html.IndexOf("\"ou\"", StringComparison.Ordinal);
 
-            while (ndx >= 0) {
+            while (ndx >= 0)
+            {
                 ndx = html.IndexOf("\"", ndx + 4, StringComparison.Ordinal);
                 ndx++;
                 int ndx2 = html.IndexOf("\"", ndx, StringComparison.Ordinal);

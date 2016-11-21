@@ -13,8 +13,10 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GestaltBot.Modules {
-    class ModeratorModule : IModule{
+namespace GestaltBot.Modules
+{
+    class ModeratorModule : IModule
+    {
 
         public static List<Channel> m_allowedNSFW = new List<Channel>();
 
@@ -23,28 +25,32 @@ namespace GestaltBot.Modules {
         private Configurations m_config;
         const string accesconfig = "configurations.json";
 
-        void IModule.Install(ModuleManager manager) {
+        void IModule.Install(ModuleManager manager)
+        {
 
             Random random = new Random();
 
             m_manager = manager;
             m_client = manager.Client;
-     
+
 
             //Lets you talkt to the bot without the command talk
-            manager.CreateCommands("", cmd => {
+            manager.CreateCommands("", cmd =>
+            {
 
                 cmd.CreateCommand("prune")
                 .Alias("p")
                 .Description("Let's you mass remove messages on a channel")
                 .MinPermissions((int)DiscordAccesLevel.MemeKnight)
                 .Parameter("number", ParameterType.Unparsed)
-                .Do(async (e) => {
+                .Do(async (e) =>
+                {
 
                     string number = e.Args[0];
                     int convertednum = Int32.Parse(number);
 
-                    if (convertednum > 100) {
+                    if (convertednum > 100)
+                    {
 
                         await e.Channel.SendMessage(e.User.Mention + ":no_entry: | I can only remove 100 messages at a time.");
                         convertednum = 100;
@@ -61,7 +67,8 @@ namespace GestaltBot.Modules {
                 .Description("Sends a message to all the people in the discord server")
                 .MinPermissions((int)DiscordAccesLevel.MemeLord)
                 .Parameter("text", ParameterType.Unparsed)
-                .Do(async (e) => {
+                .Do(async (e) =>
+                {
 
                     List<User> markedforannounce = new List<User>();
                     string text = e.Args[0];
@@ -69,11 +76,13 @@ namespace GestaltBot.Modules {
 
                     markedforannounce = (e.Server.Users.ToList<User>());
                     Console.WriteLine(markedforannounce.Count);
-                    for (int i = 0; i < markedforannounce.Count; i++) {
-                        try {
+                    for (int i = 0; i < markedforannounce.Count; i++)
+                    {
+                        try
+                        {
                             await markedforannounce[i].SendMessage(":satellite: | Good day, " + markedforannounce[i].Mention + " this is a announcement from: " + announcer + ": **[" + text + "]** ");
                         }
-                        catch {}
+                        catch { }
                     }
                     await e.Channel.SendMessage(":alarm_clock: | Announcement complete :)");
                 });
@@ -83,15 +92,18 @@ namespace GestaltBot.Modules {
                 .Description("Allows/Disallows nsfw content in the chat room")
                 .Parameter("bool", ParameterType.Unparsed)
                 .MinPermissions((int)DiscordAccesLevel.MemeKing)
-                .Do(async (e) => {
+                .Do(async (e) =>
+                {
 
                     bool boolconvert = Convert.ToBoolean(e.Args[0]);
 
-                    if (boolconvert) {
+                    if (boolconvert)
+                    {
                         RemoveServerToNSFW(e);
                         await e.Channel.SendMessage(":underage:  | NSFW is now disallowed in this channel");
                     }
-                    else {
+                    else
+                    {
                         AddServerToNSFW(e);
                         await e.Channel.SendMessage(":spy: | NSFW is now allowed in this channel");
                     }
@@ -100,27 +112,32 @@ namespace GestaltBot.Modules {
         }
 
         private bool m_isChannelIn;
-        private void AddServerToNSFW(CommandEventArgs e) {
+        private void AddServerToNSFW(CommandEventArgs e)
+        {
 
             Channel channel = e.Channel;
-            for (int i = 0; i < m_allowedNSFW.Count; i++) {
-                if (m_allowedNSFW[i] == channel) {
+            for (int i = 0; i < m_allowedNSFW.Count; i++)
+            {
+                if (m_allowedNSFW[i] == channel)
+                {
                     m_isChannelIn = true;
                 }
             }
 
-            if (!m_isChannelIn) {
+            if (!m_isChannelIn)
+            {
                 m_allowedNSFW.Add(channel);
-                Console.WriteLine(channel);
-                Console.WriteLine(m_allowedNSFW.Count);
             }
             m_isChannelIn = false;
         }
-        private void RemoveServerToNSFW(CommandEventArgs e) {
+        private void RemoveServerToNSFW(CommandEventArgs e)
+        {
 
             Channel channel = e.Channel;
-            for (int i = 0; i < m_allowedNSFW.Count; i++) {
-                if(m_allowedNSFW[i] == channel) {
+            for (int i = 0; i < m_allowedNSFW.Count; i++)
+            {
+                if (m_allowedNSFW[i] == channel)
+                {
                     m_allowedNSFW.Remove(channel);
                 }
             }
