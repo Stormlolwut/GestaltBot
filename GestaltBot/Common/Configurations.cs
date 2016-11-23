@@ -17,7 +17,7 @@ namespace GestaltBot.Types
         public Configurations()
         {
             Prefix = '!';
-            MentionPrefix = false;
+            MentionPrefix = true;
             Owners = new ulong[0];
             Token = "";
             NsfwChannels = new List<Channel>();

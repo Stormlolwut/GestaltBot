@@ -391,7 +391,6 @@ namespace GestaltBot.Modules
             try
             {
 
-
                 IEnumerable<VideoInfo> videoinfos = DownloadUrlResolver.GetDownloadUrls(fullurl, false);
 
                 VideoInfo video = videoinfos
@@ -401,7 +400,7 @@ namespace GestaltBot.Modules
                 if (video.RequiresDecryption) { DownloadUrlResolver.DecryptDownloadUrl(video); }
                 string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                     RemoveIllegalPathCharacters(video.Title) + video.AudioExtension);
-                if (File.Exists(path)) { return video; }
+                if (File.Exists((path.Replace(" ", "")))) { return video; }
 
                 VideoDownloader audiodownloader = new VideoDownloader(video, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                     RemoveIllegalPathCharacters(video.Title) + video.AudioExtension));
@@ -419,9 +418,9 @@ namespace GestaltBot.Modules
         }
         private static string RemoveIllegalPathCharacters(string path)
         {
-            string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
-            var r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
-            return r.Replace(path, "");
+            string regexsearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+            Regex regex = new Regex(string.Format("[{0}]", Regex.Escape(regexsearch)));
+            return regex.Replace(path, "");
         }
     }
 

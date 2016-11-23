@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -62,6 +63,45 @@ namespace GestaltBot.Modules
                     await e.Channel.SendMessage(e.User.Mention + ":white_check_mark: | I removed " + messagestodelete.Length + " messages for you.");
                 });
 
+                cmd.CreateCommand("pornparty")
+                .Alias("pparty")
+                .Description("Something that should not have been a thing")
+                .MinPermissions((int)DiscordAccesLevel.MemeKing)
+                .Parameter("number", ParameterType.Unparsed)
+                .Do(async (e) =>
+                {
+                    Console.WriteLine(e.Args[0].Length);
+                    int topicplace = e.Args[0].IndexOf(" ");
+                    string topic = e.Args[0].Substring(topicplace);
+                    string name = e.Args[0].Substring(0, topicplace);
+
+                    string webdata = ReturnData(topic);
+                    List<string> url = GetLinks(webdata);
+
+                    float cooldown = 1;
+
+                    IEnumerable<User> targetuser = e.Channel.FindUsers(name);
+
+                    for (int i = 0; i < url.Count; i++)
+                    {
+
+                   
+                        for (int j = 0; j < cooldown;)
+                        {
+                            cooldown -= 0.00001f;
+                            Console.WriteLine(cooldown);
+                        }
+
+                        if(cooldown <= 0)
+                        {
+                            cooldown = 1;
+                            await targetuser.FirstOrDefault().SendMessage(url[i]);
+                            url.Remove(url[i]);
+                        }
+                    }
+
+                });
+
                 cmd.CreateCommand("announce")
                 .Alias("a")
                 .Description("Sends a message to all the people in the discord server")
@@ -112,6 +152,61 @@ namespace GestaltBot.Modules
         }
 
         private bool m_isChannelIn;
+
+        private string ReturnData(string topic)
+        {
+            string url = "https://rule34.paheal.net/post/list/" + topic + "/1";
+            string data = "";
+            try
+            {
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                request.Accept = "text/html, application/xhtml+xml, */*";
+                request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
+
+                var response = (HttpWebResponse)request.GetResponse();
+
+                using (Stream datastream = response.GetResponseStream())
+                {
+                    if (datastream == null)
+                        return "";
+
+                    using (var sr = new StreamReader(datastream))
+                    {
+                        data = sr.ReadToEnd();
+                        Console.WriteLine(data);
+                    }
+                }
+            }
+            catch
+            {
+                Console.WriteLine("404");
+            }
+            return data;
+        }
+        private List<string> GetLinks(string data)
+        {
+            List<string> allurls = new List<string>();
+            int ndx = data.IndexOf("_images", StringComparison.Ordinal);
+
+            //Console.WriteLine(ndx);
+            while(ndx >= 0)
+            {
+
+                //Console.WriteLine(ndx);
+                //ndx = data.IndexOf("\"", ndx, StringComparison.Ordinal);
+                //Console.WriteLine(ndx);
+                ndx++;
+                int ndx2 = data.IndexOf("\"", ndx, StringComparison.Ordinal);
+                //Console.WriteLine(ndx2);
+                string url = data.Substring(ndx, ndx2 - ndx);
+                string fullurl = "http://rule34-data-007.paheal.net/_" + url;
+                //Console.WriteLine(fullurl);
+                allurls.Add(fullurl);
+                ndx = data.IndexOf("_images", ndx2, StringComparison.Ordinal);
+                //Console.WriteLine(ndx);
+            }
+            return allurls;
+        }
         private void AddServerToNSFW(CommandEventArgs e)
         {
 

@@ -9,9 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GestaltBot.Modules
 {
@@ -94,7 +91,7 @@ namespace GestaltBot.Modules
                         int ramdomMemeIndex = random.Next(urls.Count - 1);
                         string randomMeme = urls[ramdomMemeIndex];
 
-                        await e.Channel.SendTTSMessage(e.User.Mention + ":ok_hand: | Here is your fresh meme." + " [**" + text + "**] ");
+                        await e.Channel.SendMessage(e.User.Mention + ":ok_hand: | Here is your fresh meme." + " [**" + text + "**] ");
                         await e.Channel.SendMessage(randomMeme);
                     }
                     else
@@ -113,8 +110,6 @@ namespace GestaltBot.Modules
 
             //Move this to the moderator module within the NSFW filter instead of here!
 
-
-            Console.WriteLine(filter);
             string url = "https://www.google.com/search?q=" + topic + filter + "&tbm=isch";
             string data = "";
 
@@ -141,18 +136,23 @@ namespace GestaltBot.Modules
         {
 
             var urls = new List<string>();
-            Console.WriteLine(urls.Count);
 
             int ndx = html.IndexOf("\"ou\"", StringComparison.Ordinal);
+            Console.WriteLine(html);
 
             while (ndx >= 0)
             {
+                Console.WriteLine(ndx);
                 ndx = html.IndexOf("\"", ndx + 4, StringComparison.Ordinal);
+                Console.WriteLine(ndx);
                 ndx++;
                 int ndx2 = html.IndexOf("\"", ndx, StringComparison.Ordinal);
+                Console.WriteLine(ndx2);
                 string url = html.Substring(ndx, ndx2 - ndx);
+                Console.WriteLine(url);
                 urls.Add(url);
                 ndx = html.IndexOf("\"ou\"", ndx2, StringComparison.Ordinal);
+                Console.WriteLine(ndx);
             }
 
             return urls;
