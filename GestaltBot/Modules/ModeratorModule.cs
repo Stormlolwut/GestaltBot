@@ -66,39 +66,18 @@ namespace GestaltBot.Modules
                 cmd.CreateCommand("pornparty")
                 .Alias("pparty")
                 .Description("Something that should not have been a thing")
-                .MinPermissions((int)DiscordAccesLevel.MemeKing)
+                .MinPermissions((int)DiscordAccesLevel.MemeLord)
                 .Parameter("number", ParameterType.Unparsed)
                 .Do(async (e) =>
                 {
-                    Console.WriteLine(e.Args[0].Length);
-                    int topicplace = e.Args[0].IndexOf(" ");
-                    string topic = e.Args[0].Substring(topicplace);
-                    string name = e.Args[0].Substring(0, topicplace);
+                    string name = e.Args[0];
 
-                    string webdata = ReturnData(topic);
+                    string webdata = await ReturnData();
                     List<string> url = GetLinks(webdata);
-
-                    float cooldown = 1;
-
                     IEnumerable<User> targetuser = e.Channel.FindUsers(name);
 
-                    for (int i = 0; i < url.Count; i++)
-                    {
-
-                   
-                        for (int j = 0; j < cooldown;)
-                        {
-                            cooldown -= 0.00001f;
-                            Console.WriteLine(cooldown);
-                        }
-
-                        if(cooldown <= 0)
-                        {
-                            cooldown = 1;
-                            await targetuser.FirstOrDefault().SendMessage(url[i]);
-                            url.Remove(url[i]);
-                        }
-                    }
+                    await e.Channel.SendMessage(":eggplant: | Sending a suprise to " + targetuser.FirstOrDefault().Name);
+                    SendPicturesAsync(targetuser, url);
 
                 });
 
@@ -153,13 +132,14 @@ namespace GestaltBot.Modules
 
         private bool m_isChannelIn;
 
-        private string ReturnData(string topic)
+        private async Task<string> ReturnData()
         {
-            string url = "https://rule34.paheal.net/post/list/" + topic + "/1";
+            Random random = new Random();
+            string url = "https://rule34.paheal.net/post/list/" + random.Next(1, 5);
             string data = "";
             try
             {
-                var request = (HttpWebRequest)WebRequest.Create(url);
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                 request.Accept = "text/html, application/xhtml+xml, */*";
                 request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
 
@@ -170,7 +150,7 @@ namespace GestaltBot.Modules
                     if (datastream == null)
                         return "";
 
-                    using (var sr = new StreamReader(datastream))
+                    using (StreamReader sr = new StreamReader(datastream))
                     {
                         data = sr.ReadToEnd();
                         Console.WriteLine(data);
@@ -189,7 +169,7 @@ namespace GestaltBot.Modules
             int ndx = data.IndexOf("_images", StringComparison.Ordinal);
 
             //Console.WriteLine(ndx);
-            while(ndx >= 0)
+            while (ndx >= 0)
             {
 
                 //Console.WriteLine(ndx);
@@ -206,6 +186,14 @@ namespace GestaltBot.Modules
                 //Console.WriteLine(ndx);
             }
             return allurls;
+        }
+        private async void SendPicturesAsync(IEnumerable<User> user, List<string> url)
+        {
+            for (int i = 0; i < url.Count; i++)
+            {
+                await user.FirstOrDefault().SendMessage(url[i]);
+                url.Remove(url[i]);
+            }
         }
         private void AddServerToNSFW(CommandEventArgs e)
         {
