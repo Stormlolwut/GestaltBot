@@ -5,11 +5,6 @@ using Discord.Modules;
 using Discord.Audio;
 using GestaltBot.Enums;
 
-using NAudio;
-using NAudio.FileFormats.Map;
-using NAudio.Wave;
-using NAudio.CoreAudioApi;
-
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
@@ -40,6 +35,7 @@ namespace GestaltBot.Modules
 
         private Queue<string> m_songQueue = new Queue<string>();
 
+        private string m_videoTitle;
 
         private bool m_isplaying;
         private bool m_playstream;
@@ -123,9 +119,10 @@ namespace GestaltBot.Modules
 
                         path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), RemoveIllegalPathCharacters(video.Title) + video.AudioExtension);
                         m_songQueue.Enqueue(path);
-                        await e.Channel.SendMessage(":cd: | This song is queued: **" + RemoveIllegalPathCharacters(video.Title) + "**");
+                        m_videoTitle = video.Title;
+                        await e.Channel.SendMessage(":cd: | This song is queued: **" + RemoveIllegalPathCharacters(m_videoTitle) + "**");
 
-                        StreamToDiscordAsync(voiceservice, video, e, path);
+                        StreamToDiscordAsync(voiceservice, e, path);
 
                     }
                     catch (Exception ex)
@@ -179,7 +176,7 @@ namespace GestaltBot.Modules
                 RedirectStandardOutput = true
             });
 
-            Thread.Sleep(3000);
+            Thread.Sleep(2000);
 
             int blocksize = 3840;
 
@@ -234,7 +231,7 @@ namespace GestaltBot.Modules
             */
         }
 
-        public async void StreamToDiscordAsync(AudioService voiceservice, VideoInfo video, CommandEventArgs e, string path)
+        public async void StreamToDiscordAsync(AudioService voiceservice, CommandEventArgs e, string path)
         {
 
             bool playingmusicloop = false;
@@ -252,8 +249,8 @@ namespace GestaltBot.Modules
                     }
 
                     path = m_songQueue.Peek();
-                    await e.Channel.SendMessage(":cd: | Now playing: **" + RemoveIllegalPathCharacters(video.Title) + "**");
-                    m_client.SetGame(RemoveIllegalPathCharacters(video.Title));
+                    await e.Channel.SendMessage(":dvd: | Now playing: **" + RemoveIllegalPathCharacters(m_videoTitle) + "**");
+                    m_client.SetGame(RemoveIllegalPathCharacters(m_videoTitle));
                     m_playstream = true;
                     SendAudio(path, m_audioClient);
 
