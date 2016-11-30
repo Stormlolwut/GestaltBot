@@ -3,7 +3,7 @@ using Discord.Commands;
 using Discord.Commands.Permissions.Levels;
 using Discord.Modules;
 using GestaltBot.Enums;
-
+using GestaltBot.Types;
 
 using System;
 using System.Collections.Generic;
@@ -70,17 +70,12 @@ namespace GestaltBot.Modules
                 .Parameter("text", ParameterType.Unparsed)
                 .Do(async (e) =>
                 {
-                    List<Channel> nsfwlist = ModeratorModule.m_allowedNSFW;
                     string text = e.Args[0];
-                    string filter = "&safe=on";
 
-                    for (int i = 0; i < ModeratorModule.m_allowedNSFW.Count; i++)
-                    {
-                        if (e.Channel == nsfwlist[i])
-                        {
-                            filter = "&safe=off";
-                        }
-                    }
+                    string filter;
+                    if(Configurations.config.NsfwChannels.Contains(e.Channel.Id.ToString())) filter = "&safe=off";
+                    else filter = "&safe=on";
+                    Console.WriteLine(filter);
 
                     string html = GetHtmlLink(text, filter);
                     List<string> urls = ParseUrl(html);
@@ -138,21 +133,21 @@ namespace GestaltBot.Modules
             var urls = new List<string>();
 
             int ndx = html.IndexOf("\"ou\"", StringComparison.Ordinal);
-            Console.WriteLine(html);
+            //Console.WriteLine(html);
 
             while (ndx >= 0)
             {
-                Console.WriteLine(ndx);
+                //Console.WriteLine(ndx);
                 ndx = html.IndexOf("\"", ndx + 4, StringComparison.Ordinal);
-                Console.WriteLine(ndx);
+                //Console.WriteLine(ndx);
                 ndx++;
                 int ndx2 = html.IndexOf("\"", ndx, StringComparison.Ordinal);
-                Console.WriteLine(ndx2);
+                //Console.WriteLine(ndx2);
                 string url = html.Substring(ndx, ndx2 - ndx);
-                Console.WriteLine(url);
+                //Console.WriteLine(url);
                 urls.Add(url);
                 ndx = html.IndexOf("\"ou\"", ndx2, StringComparison.Ordinal);
-                Console.WriteLine(ndx);
+                //Console.WriteLine(ndx);
             }
 
             return urls;

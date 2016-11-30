@@ -16,34 +16,15 @@ using System.Threading.Tasks;
 
 namespace GestaltBot
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args) => new Program().Start();
 
         private DiscordClient m_client;
-        private Configurations m_config;
 
         public void Start()
         {
-
-            const string accesconfig = "configurations.json";
-
-            try
-            {
-                m_config = Configurations.LoadFile(accesconfig);
-            }
-            catch
-            {
-
-                m_config = new Configurations();
-
-                Console.WriteLine("The example bot's configuration file has been created. Please enter a valid token.");
-                Console.Write("Token: ");
-
-                m_config.Token = Console.ReadLine();
-                m_config.SaveFile(accesconfig);
-
-            }
+            Configurations.LoadFile();
 
             m_client = new DiscordClient(x =>
             {
@@ -56,8 +37,8 @@ namespace GestaltBot
             .UsingCommands(x =>
             {
 
-                x.AllowMentionPrefix = m_config.MentionPrefix;
-                x.PrefixChar = m_config.Prefix;
+                x.AllowMentionPrefix = Configurations.config.MentionPrefix;
+                x.PrefixChar = Configurations.config.Prefix;
                 x.HelpMode = HelpMode.Public;
             })
             .UsingPermissionLevels((u, c) => (int)GetPermissions(u, c))
@@ -78,7 +59,7 @@ namespace GestaltBot
                 {
                     try
                     {
-                        await m_client.Connect(m_config.Token, TokenType.Bot);
+                        await m_client.Connect(Configurations.config.Token, TokenType.Bot);
                         break;
                     }
                     catch (Exception ex)
@@ -100,7 +81,7 @@ namespace GestaltBot
             if (user.IsBot)
                 return DiscordAccesLevel.Blocked;
 
-            if (m_config.Owners.Contains(user.Id))
+            if (Configurations.config.Owners.Contains(user.Id))
                 return DiscordAccesLevel.BotOwner;
 
             if (!channel.IsPrivate)

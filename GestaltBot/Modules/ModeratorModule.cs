@@ -18,13 +18,8 @@ namespace GestaltBot.Modules
 {
     class ModeratorModule : IModule
     {
-
-        public static List<Channel> m_allowedNSFW = new List<Channel>();
-
         private ModuleManager m_manager;
         private DiscordClient m_client;
-        private Configurations m_config;
-        const string accesconfig = "configurations.json";
 
         void IModule.Install(ModuleManager manager)
         {
@@ -110,10 +105,19 @@ namespace GestaltBot.Modules
                 .Alias("filter")
                 .Description("Allows/Disallows nsfw content in the chat room")
                 .Parameter("bool", ParameterType.Unparsed)
-                .MinPermissions((int)DiscordAccesLevel.MemeKing)
+                .MinPermissions((int)DiscordAccesLevel.MemeLord)
                 .Do(async (e) =>
                 {
+                    if (e.Args[0] == "")
+                    {
+                        if(Configurations.config.NsfwChannels.Contains(e.Channel.Id.ToString()))
+                            await e.Channel.SendMessage(":spy: | NSFW is allowed in this channel");
+                        else
+                            await e.Channel.SendMessage(":underage:  | NSFW is disallowed in this channel");
 
+                        //We can stop here since the argument was empty
+                        return;
+                    }
                     bool boolconvert = Convert.ToBoolean(e.Args[0]);
 
                     if (boolconvert)
@@ -129,8 +133,6 @@ namespace GestaltBot.Modules
                 });
             });
         }
-
-        private bool m_isChannelIn;
 
         private async Task<string> ReturnData()
         {
@@ -197,32 +199,29 @@ namespace GestaltBot.Modules
         }
         private void AddServerToNSFW(CommandEventArgs e)
         {
-
             Channel channel = e.Channel;
-            for (int i = 0; i < m_allowedNSFW.Count; i++)
+            string id = channel.Id.ToString();
+            Console.WriteLine("Channel id: " + id);
+            if (!Configurations.config.NsfwChannels.Contains(id))
             {
-                if (m_allowedNSFW[i] == channel)
+                Configurations.config.NsfwChannels.Add(id);
+                Console.WriteLine("NSFW Channels:");
+                foreach(string s in Configurations.config.NsfwChannels)
                 {
-                    m_isChannelIn = true;
+                    Console.WriteLine(s);
                 }
+                Configurations.config.SaveFile();
             }
-
-            if (!m_isChannelIn)
-            {
-                m_allowedNSFW.Add(channel);
-            }
-            m_isChannelIn = false;
         }
         private void RemoveServerToNSFW(CommandEventArgs e)
         {
-
             Channel channel = e.Channel;
-            for (int i = 0; i < m_allowedNSFW.Count; i++)
+            string id = channel.Id.ToString();
+            Console.WriteLine("Channel id: " + id);
+            if (Configurations.config.NsfwChannels.Contains(id))
             {
-                if (m_allowedNSFW[i] == channel)
-                {
-                    m_allowedNSFW.Remove(channel);
-                }
+                Configurations.config.NsfwChannels.Remove(id);
+                Configurations.config.SaveFile();
             }
         }
     }
