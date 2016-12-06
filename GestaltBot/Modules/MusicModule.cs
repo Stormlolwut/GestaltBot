@@ -17,6 +17,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ namespace GestaltBot.Modules
 
         private Discord.Channel m_voiceChannel;
 
-        private ReturnYoutubeInfo m_linkInfo;
+        private ReturnYoutubeInfo m_LinkInfo;
 
         private Queue<string> m_songQueue = new Queue<string>();
 
@@ -71,8 +72,6 @@ namespace GestaltBot.Modules
                 {
 
                     List<string> videos = new List<string>();
-                    List<string> channels = new List<string>();
-                    List<string> playlists = new List<string>();
 
                     string servername = e.Server.Name;
                     string channelname = "";
@@ -95,12 +94,13 @@ namespace GestaltBot.Modules
 
                         string url = e.Args[0];
                         bool islink = await CheckifLinkAsync(e.Args[0]);
+                        bool isplaylist = await CheckifVideoPlayList(e.Args[0]);
 
-                        if (!islink)
+                        if (!islink && !isplaylist)
                         {
 
                             await GetYoutubeLinkAsync(e.Args[0]);
-                            videos = m_linkInfo.videos;
+                            videos = m_LinkInfo.videos;
                             url = ReadOutLink(videos[0].ToString());
                             string fullurl = Path.Combine("https://www.youtube.com/watch?v=" + url);
                             video = await DownloadYoutubeLinkAsync(fullurl);
@@ -112,15 +112,30 @@ namespace GestaltBot.Modules
                                 return;
                             }
                         }
-                        else
+                        else if (islink && !isplaylist)
                         {
                             video = await DownloadYoutubeLinkAsync(url);
+                        }
+                        else
+                        {
+                            string data = ReadOutLists(url);
+                            List<string> allurls = AddListToQueue(data);
+                            for (int i = 0; i < 20; i++)
+                            {
+                                video = await DownloadYoutubeLinkAsync(allurls[i]);
+                                allurls.Remove(allurls[i]);
+                                path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), RemoveIllegalPathCharacters(video.Title) + video.AudioExtension);
+                                m_songQueue.Enqueue(path);
+
+                            }
+                            await e.Channel.SendMessage(":minidisc:| There are: **" + m_songQueue.Count + "** songs enqueued");
+                            StreamToDiscordAsync(voiceservice, e, path);
+                            return;
                         }
 
                         path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), RemoveIllegalPathCharacters(video.Title) + video.AudioExtension);
                         m_songQueue.Enqueue(path);
-                        m_videoTitle = video.Title;
-                        await e.Channel.SendMessage(":cd: | This song is queued: **" + RemoveIllegalPathCharacters(m_videoTitle) + "**");
+                        await e.Channel.SendMessage(":dvd:  | This song is queued: **" + RemoveIllegalPathCharacters(video.Title) + "**");
 
                         StreamToDiscordAsync(voiceservice, e, path);
 
@@ -152,10 +167,10 @@ namespace GestaltBot.Modules
                 cmd.CreateCommand("skip")
                 .Alias("sk")
                 .Description("Skips to the next song")
-                .Do( (e) =>
-                {
-                    m_skipSong = true;
-                });
+                .Do((e) =>
+               {
+                   m_skipSong = true;
+               });
 
             });
 
@@ -249,6 +264,10 @@ namespace GestaltBot.Modules
                     }
 
                     path = m_songQueue.Peek();
+                    int ndx = m_songQueue.Peek().IndexOf("Documents", StringComparison.Ordinal);
+                    int ndx2 = m_songQueue.Peek().IndexOf(".", ndx, StringComparison.Ordinal);
+                    ndx += 9;
+                    m_videoTitle = m_songQueue.Peek().Substring(ndx, ndx2 - ndx);
                     await e.Channel.SendMessage(":dvd: | Now playing: **" + RemoveIllegalPathCharacters(m_videoTitle) + "**");
                     m_client.SetGame(RemoveIllegalPathCharacters(m_videoTitle));
                     m_playstream = true;
@@ -325,7 +344,7 @@ namespace GestaltBot.Modules
                         break;
                 }
             }
-            m_linkInfo = new ReturnYoutubeInfo(videos, channels, playlists);
+            m_LinkInfo = new ReturnYoutubeInfo(videos, channels, playlists);
             return true;
         }
 
@@ -350,6 +369,62 @@ namespace GestaltBot.Modules
             }
 
             return video;
+        }
+
+        public string ReadOutLists(string url)
+        {
+            string data = "";
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                request.Accept = "text/html, application/xhtml+xml, */*";
+                request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
+
+                var response = (HttpWebResponse)request.GetResponse();
+
+                using (Stream datastream = response.GetResponseStream())
+                {
+                    if (datastream == null)
+                        return "";
+
+                    using (StreamReader sr = new StreamReader(datastream))
+                    {
+                        data = sr.ReadToEnd();
+                        Console.WriteLine(data);
+                    }
+                }
+            }
+            catch
+            {
+                Console.WriteLine("404");
+                //"/watch?
+            }
+            return data;
+        }
+
+        public List<string> AddListToQueue(string data)
+        {
+            List<string> allurls = new List<string>();
+            int ndx = data.IndexOf("\"/watch?", StringComparison.Ordinal);
+
+            //Console.WriteLine(ndx);
+            while (ndx >= 0)
+            {
+
+                //Console.WriteLine(ndx);
+                //ndx = data.IndexOf("\"", ndx, StringComparison.Ordinal);
+                //Console.WriteLine(ndx);
+                ndx++;
+                int ndx2 = data.IndexOf("GSI", ndx, StringComparison.Ordinal);
+                //Console.WriteLine(ndx2);
+                string url = data.Substring(ndx, ndx2 - ndx);
+                string fullurl = "https://youtube.com/" + url;
+                //Console.WriteLine(fullurl);
+                allurls.Add(fullurl);
+                ndx = data.IndexOf("\"/watch?", ndx2, StringComparison.Ordinal);
+                //Console.WriteLine(ndx);
+            }
+            return allurls;
         }
 
         public async Task<bool> CheckifLinkAsync(string url)
@@ -382,6 +457,16 @@ namespace GestaltBot.Modules
             return false;
         }
 
+        public async Task<bool> CheckifVideoPlayList(string url)
+        {
+
+            int ndx = url.IndexOf("list=");
+            if (ndx > 0)
+                return true;
+
+            return false;
+        }
+
         public async Task<VideoInfo> DownloadYoutubeLinkAsync(string fullurl)
         {
 
@@ -395,9 +480,13 @@ namespace GestaltBot.Modules
                     .First(info => info.VideoType == VideoType.Mp4 && info.Resolution == 720 || info.Resolution == 480 || info.Resolution == 360);
 
                 if (video.RequiresDecryption) { DownloadUrlResolver.DecryptDownloadUrl(video); }
+
                 string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                     RemoveIllegalPathCharacters(video.Title) + video.AudioExtension);
-                if (File.Exists((path.Replace(" ", "")))) { return video; }
+
+                if (File.Exists((path.Replace(" ", ""))) || File.Exists(path)) {
+                    return video;
+                }
 
                 VideoDownloader audiodownloader = new VideoDownloader(video, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                     RemoveIllegalPathCharacters(video.Title) + video.AudioExtension));

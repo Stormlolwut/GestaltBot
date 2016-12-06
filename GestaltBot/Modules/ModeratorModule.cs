@@ -29,8 +29,6 @@ namespace GestaltBot.Modules
             m_manager = manager;
             m_client = manager.Client;
 
-
-            //Lets you talkt to the bot without the command talk
             manager.CreateCommands("", cmd =>
             {
 
@@ -110,7 +108,7 @@ namespace GestaltBot.Modules
                 {
                     if (e.Args[0] == "")
                     {
-                        if(Configurations.config.NsfwChannels.Contains(e.Channel.Id.ToString()))
+                        if (Configurations.config.NsfwChannels.Contains(e.Channel.Id.ToString()))
                             await e.Channel.SendMessage(":spy: | NSFW is allowed in this channel");
                         else
                             await e.Channel.SendMessage(":underage:  | NSFW is disallowed in this channel");
@@ -206,7 +204,7 @@ namespace GestaltBot.Modules
             {
                 Configurations.config.NsfwChannels.Add(id);
                 Console.WriteLine("NSFW Channels:");
-                foreach(string s in Configurations.config.NsfwChannels)
+                foreach (string s in Configurations.config.NsfwChannels)
                 {
                     Console.WriteLine(s);
                 }
