@@ -56,9 +56,8 @@ namespace GestaltBot.Modules
                     await e.Channel.SendMessage(e.User.Mention + ":white_check_mark: | I removed " + messagestodelete.Length + " messages for you.");
                 });
 
-                cmd.CreateCommand("pornparty")
+                cmd.CreateCommand("")
                 .Alias("pparty")
-                .Description("Something that should not have been a thing")
                 .MinPermissions((int)DiscordAccesLevel.MemeLord)
                 .Parameter("number", ParameterType.Unparsed)
                 .Do(async (e) =>
@@ -153,7 +152,6 @@ namespace GestaltBot.Modules
                     using (StreamReader sr = new StreamReader(datastream))
                     {
                         data = sr.ReadToEnd();
-                        Console.WriteLine(data);
                     }
                 }
             }
@@ -189,10 +187,19 @@ namespace GestaltBot.Modules
         }
         private async void SendPicturesAsync(IEnumerable<User> user, List<string> url)
         {
-            for (int i = 0; i < url.Count; i++)
+
+            for (int i = 0; i < url.Count;)
             {
-                await user.FirstOrDefault().SendMessage(url[i]);
-                url.Remove(url[i]);
+                string fullurl = "";
+                for (int j = 0; j < 5; j++)
+                {
+                    fullurl += url[j];
+                    url.Remove(url[j]);
+                    fullurl += " ";
+                }
+
+                await user.FirstOrDefault().SendMessage(fullurl);
+                i += 5;
             }
         }
         private void AddServerToNSFW(CommandEventArgs e)

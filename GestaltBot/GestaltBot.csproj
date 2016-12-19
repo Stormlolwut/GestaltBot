@@ -142,6 +142,7 @@
     <Compile Include="MainBot.cs" />
     <Compile Include="Modules\ModeratorModule.cs" />
     <Compile Include="Modules\MusicModule.cs" />
+    <Compile Include="Modules\MusicModuleV2.cs" />
     <Compile Include="Modules\OverwatchModule.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

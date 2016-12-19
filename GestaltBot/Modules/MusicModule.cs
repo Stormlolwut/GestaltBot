@@ -108,7 +108,7 @@ namespace GestaltBot.Modules
 
                             if (videos == null && url.Count() == 0)
                             {
-                                await e.Channel.SendMessage(":no_entry:  | Sorry i couldn't find anything!");
+                                await e.Channel.SendMessage(":no_entry:| Sorry i couldn't find anything!");
                                 return;
                             }
                         }
@@ -215,38 +215,9 @@ namespace GestaltBot.Modules
 
             voiceclient.Wait();
             m_isplaying = false;
-
-            /*
-            int channelcount = m_client.GetService<AudioService>().Config.Channels;
-            WaveFormat outformat = new WaveFormat(48000, 16, channelcount);
-
-            using (var MP3reader = new MediaFoundationReader(filepath))
-            using (var resampler = new MediaFoundationResampler(MP3reader, outformat))
-            {
-                resampler.ResamplerQuality = 60;
-                int blockSize = outformat.AverageBytesPerSecond / 50;
-                byte[] buffer = new byte[blockSize];
-                int byteCount;
-
-                while ((byteCount = resampler.Read(buffer, 0, blockSize)) > 0)
-                {
-                    if (byteCount < blockSize)
-                    {
-
-                        for (int i = byteCount; i < blockSize; i++)
-                            buffer[i] = 0;
-                    }
-
-                    voiceclient.Send(buffer, 0, blockSize); // Send the buffer to Discord
-                    m_isplaying = true;
-                }
-
-                m_isplaying = false;
-            }
-            */
         }
 
-        public async void StreamToDiscordAsync(AudioService voiceservice, CommandEventArgs e, string path)
+        private async void StreamToDiscordAsync(AudioService voiceservice, CommandEventArgs e, string path)
         {
 
             bool playingmusicloop = false;
@@ -286,11 +257,10 @@ namespace GestaltBot.Modules
             while (playingmusicloop);
         }
 
-        public async void StopAudioAsync(IAudioClient voiceclient, AudioService voiceservice, CommandEventArgs e)
+        private async void StopAudioAsync(IAudioClient voiceclient, AudioService voiceservice, CommandEventArgs e)
         {
             if (voiceclient != null)
             {
-
                 string servername = e.Server.Name;
                 string channelname = e.Channel.Name;
                 Discord.Channel voicechannel = m_client.FindServers(servername).FirstOrDefault().FindChannels(channelname).FirstOrDefault();
@@ -311,7 +281,7 @@ namespace GestaltBot.Modules
             }
         }
 
-        public async Task<bool> GetYoutubeLinkAsync(string searchargs)
+        private async Task<bool> GetYoutubeLinkAsync(string searchargs)
         {
 
             YouTubeService youtubeservice = new YouTubeService(new BaseClientService.Initializer()
@@ -348,7 +318,7 @@ namespace GestaltBot.Modules
             return true;
         }
 
-        public string ReadOutLink(string video)
+        private string ReadOutLink(string video)
         {
 
             bool reading = false;
@@ -371,7 +341,7 @@ namespace GestaltBot.Modules
             return video;
         }
 
-        public string ReadOutLists(string url)
+        private string ReadOutLists(string url)
         {
             string data = "";
             try
@@ -402,7 +372,7 @@ namespace GestaltBot.Modules
             return data;
         }
 
-        public List<string> AddListToQueue(string data)
+        private List<string> AddListToQueue(string data)
         {
             List<string> allurls = new List<string>();
             int ndx = data.IndexOf("\"/watch?", StringComparison.Ordinal);
@@ -427,7 +397,7 @@ namespace GestaltBot.Modules
             return allurls;
         }
 
-        public async Task<bool> CheckifLinkAsync(string url)
+        private async Task<bool> CheckifLinkAsync(string url)
         {
             bool ischeckingurl = false;
             string newurl = "";
@@ -457,7 +427,7 @@ namespace GestaltBot.Modules
             return false;
         }
 
-        public async Task<bool> CheckifVideoPlayList(string url)
+        private async Task<bool> CheckifVideoPlayList(string url)
         {
 
             int ndx = url.IndexOf("list=");
@@ -467,7 +437,7 @@ namespace GestaltBot.Modules
             return false;
         }
 
-        public async Task<VideoInfo> DownloadYoutubeLinkAsync(string fullurl)
+        private async Task<VideoInfo> DownloadYoutubeLinkAsync(string fullurl)
         {
 
             try

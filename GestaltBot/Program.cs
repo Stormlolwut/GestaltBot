@@ -47,9 +47,8 @@ namespace GestaltBot
             m_client.Log.Message += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
 
             m_client.AddModule<Modules.UserModule>();
-            m_client.AddModule<Modules.TalkModule>();
             m_client.AddModule<Modules.ModeratorModule>();
-            m_client.AddModule<Modules.MusicModule>();
+            m_client.AddModule<Modules.MusicModuleV2>();
             m_client.AddModule<Modules.OverwatchModule>();
 
             m_client.ExecuteAndWait(async () =>
