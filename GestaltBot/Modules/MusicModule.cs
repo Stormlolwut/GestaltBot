@@ -1,4 +1,4 @@
-﻿using Discord;
+﻿/*using Discord;
 using Discord.Commands;
 using Discord.Commands.Permissions.Levels;
 using Discord.Modules;
@@ -347,7 +347,7 @@ namespace GestaltBot.Modules
             try
             {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                request.Accept = "text/html, application/xhtml+xml, */*";
+                request.Accept = "text/html, application/xhtml+xml, *//**";
                 request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
 
                 var response = (HttpWebResponse)request.GetResponse();
@@ -495,4 +495,4 @@ namespace GestaltBot.Modules
         }
     }
 
-}
+}*/
